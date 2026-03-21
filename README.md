@@ -42,18 +42,43 @@ El primero paso es lanzar **Nmap** sin *ping* (-Pn) y con los *scripts* por *def
 <img width="1151" height="662" alt="Captura de pantalla 2026-03-14 130729" src="https://github.com/user-attachments/assets/bc794144-37eb-432b-b38d-3b173b6946c2" />
 <img width="1162" height="634" alt="Captura de pantalla 2026-03-14 130835" src="https://github.com/user-attachments/assets/1a05d8f5-7623-42ec-b556-01e4db5efdfa" />
 
-
-
 El comando devuelve varios puertos TCPs abiertos de los cuales se prestará especial atención a tres:  
 - En el puerto 88 corre el servicio *Microsoft Windows Kerberos*, en un sistema *Windows*, servicio *SSH*.
-- En el puerto 389 corre 
-- En el puerto 445 corre la versión *SMBv2.02*, en un sistema *Ubuntu*, servicio *HTTP*.
+- En el puerto 389 corre el servicio LDAP (Protocolo Ligero de Acceso a Directorios) encargado de manejar la forma en que las aplicaciones acceden y modifican la información en el *Active Directory*. Por lo que se puede esperar que estamos ante un *Domain controller*.
+- En el puerto 445 corre la versión 2.02 del servicio *SMB*.
 
+Tambié se averigua que el nombre del dominio de NetBIOS es THM-AD, mientras que el nombre de dominio DNS es *spookysec.local*.
 
+Para facilitar el uso de las siguientes herramientas se añade la IP de la víctima a nuestro DNS local y quehaga la resolución DNS automáticamente.
+
+<code>echo 10.129.148.245 spookysec.local >> /etc/hosts</code>
+
+Lo primero será atacar el puerto 88 para enumerar los diferentes usuarios que hayan almacenados en el *Active Directory*. En este puerto corre el servicio, antes mencionado, *Kerberos*, el cual es un protocolo de autenticación de red que permite a usuarios y servicios demostrar su identidad de forma segura en una red, sin enviar contraseñas en texto plano. Se usa mucho en entornos empresariales, especialmente en *Microsoft Active Directory* y sistemas basados en *MIT Kerberos*. *Kerberos* funciona con tickets cifrados, en lugar de enviar la contraseña cada vez que accedes a un servicio, el sistema te da un ticket que prueba que ya te autenticaste. Así se evita que la contraseña viaje por la red. Como resúmen, *Active Directory* se el sistema de gestión y *kerberos* es el mecanismo de autenticación.
+Pues bien, la herramienta a utilizar se llama **kerbrute** que permite enumerar usuarios y probar contraseñas en dominios de AD usando el protocolo *kerberos*. Se le pasa el parametro 'usernum' para la enumeración de usuarios, se infomra el nombre del *Domian Controller* (--dc), el del dominio (-d), el número de hilos (-t) y una lista de usuairos con los que probar (users.txt).
+
+<code>kerbrute userenum --dc spookysec.local -d spookysec.local -t 100 users.txt</code>
+
+<img width="895" height="399" alt="Captura de pantalla 2026-03-15 211822" src="https://github.com/user-attachments/assets/ca970e51-a1ec-4f47-8ae0-576ff48c7bc1" />
 
 
 ### Vulnerabilidades explotadas
 
+Con los usuario devuelto, crearse una lista de usuarios válidos ('users_valid.txt') para encontrar el *ticket* del usuario correcto, es decir, aquel usuario que no necesita una autenticación válida antes de utilizar el protocolo *Kerberos*. Este método de ataque se conoce como 'ASREPRoasting' y para ello se utiliza la herramienta **Impacket**, la cual contiene varios programas de **Python***. En este caso se utiliza **GetBPUsers.py** desde la carpeta donde se almacena '/opt/impacket/examples'. Por medio de *Python3* se ejecuta el programa indicandole el dominio a tratar y la lista de usuarios con los que probar.
 
+<code>python3 GetNPUsers.py spookysec.local/ -usersfile /root/users_valid.txt</code>
+
+<img width="897" height="288" alt="Captura de pantalla 2026-03-15 213008" src="https://github.com/user-attachments/assets/710d7732-75b8-4c89-b267-294707fa7030" />
+
+Como resultado se averigua que el usuario buscado era 'svc-admin' y obtenemos el *hash* de su contraseña. Este *hash* se guarda en un documento de texto ('hash') y con la herramienta **John the ripper** y pasándole una 'wordlist' se puede descifrar la contraseña. La lista que se le pasa es la proporcionada por el propio *Try Hack Me* para resolver esta máquina.
+
+<code>john --wordlist=passwords.txt hash</code>
+
+<img width="905" height="232" alt="Captura de pantalla 2026-03-15 213416" src="https://github.com/user-attachments/assets/b90dfec6-e21b-4282-995f-e4e9a1363cdc" />
+
+La contraseña resulta ser 'management2005'.
+
+<code></code>
+<code></code>
+<code></code>
 
 **Flag: fleeb juice **
