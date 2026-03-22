@@ -66,13 +66,13 @@ Pues bien, la herramienta a utilizar se llama **kerbrute** que permite enumerar 
 
 ### Vulnerabilidades explotadas
 
-Con los usuario devuelto, crearse una lista de usuarios válidos ('users_valid.txt') para encontrar el *ticket* del usuario correcto, es decir, aquel usuario que no necesita una autenticación válida antes de utilizar el protocolo *Kerberos*. Este método de ataque se conoce como 'ASREPRoasting' y para ello se utiliza la herramienta **Impacket**, la cual contiene varios programas de **Python***. En este caso se utiliza **GetBPUsers.py** desde la carpeta donde se almacena '/opt/impacket/examples'. Por medio de *Python3* se ejecuta el programa indicandole el dominio a tratar y la lista de usuarios con los que probar.
+Con los usuarios devueltos, crearse una lista de usuarios válidos ('users_valid.txt') para encontrar el *ticket* del usuario correcto, es decir, aquel usuario que no necesita una autenticación válida antes de utilizar el protocolo *Kerberos*. Este método de ataque se conoce como 'ASREPRoasting' y para ello se utiliza la herramienta **Impacket**, la cual contiene varios programas de **Python***. En este caso se utiliza **GetBPUsers.py** desde la carpeta donde se almacena '/opt/impacket/examples'. Por medio de *Python3* se ejecuta el programa indicandole el dominio a tratar y la lista de usuarios con los que probar.
 
 <code>python3 GetNPUsers.py spookysec.local/ -usersfile /root/users_valid.txt</code>
 
 <img width="897" height="288" alt="Captura de pantalla 2026-03-15 213008" src="https://github.com/user-attachments/assets/710d7732-75b8-4c89-b267-294707fa7030" />
 
-Como resultado se averigua que el usuario buscado era 'svc-admin' y obtenemos el *hash* de su contraseña. Este *hash* se guarda en un documento de texto ('hash') y con la herramienta **John the ripper** y pasándole una 'wordlist' se puede descifrar la contraseña. La lista que se le pasa es la proporcionada por el propio *Try Hack Me* para resolver esta máquina.
+Como resultado se averigua que el usuario buscado era 'svc-admin' y obtenemos el *hash* de su contraseña. Este se guarda en un documento de texto ('hash'). Con la herramienta **John the ripper** y pasándole una 'wordlist' se puede descifrar la contraseña. La lista que se le pasa es la proporcionada por el propio reto de *Try Hack Me* para resolver esta máquina.
 
 <code>john --wordlist=passwords.txt hash</code>
 
