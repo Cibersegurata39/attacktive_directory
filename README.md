@@ -104,5 +104,17 @@ Para conseguir los *hashes* del resto de usuarios se utiliza otra herramienta de
 
 <img width="935" height="497" alt="Captura de pantalla 2026-03-16 172402" src="https://github.com/user-attachments/assets/d645713a-d11b-479a-b463-053fa25e1060" />
 
+Ya sólo queda acceder al sistema con los usuarios (pedidos en este reto por parte de *Try Hack me*) 'scv-admin', 'backup' y 'Administrator' por medio de un ataque **pass the hash**. Este ataque consiste en usar directamente los *hashes* encontrados, sin necesidad de decifrarlos, para iniciar sesión con cualquiera de los usuarios. Esto se hace mediante la herramietna propuesta **Evil-WinRM** que nos dará acceso por medio de *Windows Remote Management*.
+Para el usuario Administrator,por ejemplo, el comando seria el siguiente, donde se informan la IP (-i), el usuario (-u) y el *hash* (-H).
 
-**Flag:  **
+<code>evil-winrm -i spookysec.local -u Administrator -H 0e0363213e37b94221497260b0bcb4fc</code>
+
+Una vez se tiene acceso al sistema con cada usuario, sólo es necesario buscar el archivo que contiene las banderas, las cuales se encontraban en el escritorio de cada usuario.
+
+<img width="706" height="737" alt="Captura de pantalla 2026-03-16 174254" src="https://github.com/user-attachments/assets/7f81d9cc-17a5-4734-ad40-34b9d1f3a67f" />
+
+**flag Administrator: TryHackMe{4ctiveD1rectoryM4st3r}**
+
+**flag svc-admin: TryHackMe{K3rb3r0s_Pr3_4uth}**
+
+**flag backup: TryHackMe{B4ckM3UpSc0tty!}**
