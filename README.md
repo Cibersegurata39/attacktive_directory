@@ -1,12 +1,14 @@
 # attacktive_directory
-Máquina resuelta de *TryHackMe* en la que se trabaja la enumeración y *fingerprinting*, explotar el servicio *kerberos*, *crackeo* de contraseñas, realizar un *dump* de *hashes* y *pass the hash* penetración por medio del servicio SMB
+Máquina resuelta de *TryHackMe* en la que se trabaja la enumeración y *fingerprinting*, explotar el servicio *kerberos*, *crackeo* de contraseñas, realizar un *dump* de *hashes* y *pass the hash* para penetrar por medio del servicio SMB.
 <div>
   <img src="https://img.shields.io/badge/-Kali-5e8ca8?style=for-the-badge&logo=kalilinux&logoColor=white" />
   <img src="https://img.shields.io/badge/-Nmap-6933FF?style=for-the-badge&logo=nmap&logoColor=white" />
   <img src="https://img.shields.io/badge/-python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
   <img src="https://img.shields.io/badge/-Kerbrute-005571?style=for-the-badge&logo=kerbrute&logoColor=white" />
-  
-  <img src="https://img.shields.io/badge/-php-777BB4?style=for-the-badge&logo=php&logoColor=white" />
+  <img src="https://img.shields.io/badge/-john-F4B942?style=for-the-badge&logo=john&logoColor=white" />
+  <img src="https://img.shields.io/badge/-smbclient-3B47C2?style=for-the-badge&logo=smbclient&logoColor=white" />
+  <img src="https://img.shields.io/badge/-evilwinrm-BA0C2F?style=for-the-badge&logo=evil-winrm&logoColor=white" />
+  <img src="https://img.shields.io/badge/-impacket-1E8E3E?style=for-the-badge&logo=impacket&logoColor=white" />
   <img src="https://img.shields.io/badge/-Bash-4EAA25?style=for-the-badge&logo=gnubash&logoColor=white" />
   <img src="https://img.shields.io/badge/-Netcat-F5455C?style=for-the-badge&logo=netcat&logoColor=white" />
 </div>
