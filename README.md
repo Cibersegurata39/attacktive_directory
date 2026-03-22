@@ -19,9 +19,9 @@ Explicar la realización del siguiente _Capture the flag_ perteneciente a la pla
 
 - Realizar *fingerprinting* y enumeración de puertos.
 - Enumerar usuarios del servicio *kerberos*.
+- *Crackeo* de contraseñas.
 - *Dump* de *hashes*.
 - *Pass the hash*
-- *Crackeo* de contraseñas.
 - Escalada de privilegios.
 
 ## Herramientas utilizadas
@@ -76,9 +76,33 @@ Como resultado se averigua que el usuario buscado era 'svc-admin' y obtenemos el
 <img width="905" height="232" alt="Captura de pantalla 2026-03-15 213416" src="https://github.com/user-attachments/assets/b90dfec6-e21b-4282-995f-e4e9a1363cdc" />
 
 La contraseña resulta ser 'management2005'.
+Una vez conseguidas las credenciales se dispone a ver cuales son los recursos del usuario via *SMB*. Este protoclo permite acceder a archivos e impresoras compartidas en red. Con la ayuda de la herramienta **smbclient** se entrará en los recursos compartidos del usuario 'svc-admin'. El comando -L listará estos recursos, también se indica el usuario cuyos recursos se quieren consultar e informar del usuario (-U) y contraseña para conseguir el acceso.
 
-<code></code>
-<code></code>
-<code></code>
+<code>smbclient -L \\\\spookysec.local\\svc-admin -U svc-admin</code>
 
-**Flag: fleeb juice **
+<img width="780" height="220" alt="Captura de pantalla 2026-03-15 214203" src="https://github.com/user-attachments/assets/883470ba-060a-4cc7-8096-2f1aff94cdba" />
+
+De entre los recursos compartidos parece interesante el llamado 'backup'. Con la misma herramienta se puede consultar su contenido, donde se encuentra el documento backup_credentials.txt. Solo es necesario descargarlo con el comadno *get* para posteriormente leerlo.
+
+<code>smbclient \\\\spookysec.local\\backup -U svc-admin</code>
+
+<code>get backup_credentials.txt</code>
+
+<code>cat backup_credentials.txt</code>
+
+<img width="892" height="307" alt="Captura de pantalla 2026-03-15 214816" src="https://github.com/user-attachments/assets/f5fdccfe-80bd-424b-9274-b4ea02d47a80" />
+
+Este documento contiene un string en base64 que al decodificarlo se obtiene un usuario y contraseña. Este nuevo perfil debe almacenar más hashes de otros usuarios, pues es la cuenta de respaldo del *Active Directory*.
+
+<code>echo YmFja3VwQHNwb29reXNlYy5sb2NhbDpiYWNrdXAyNTE3ODYw | base64 -d</code>
+
+<code>backup@spookysec.local:backup2517860</code>
+
+Para conseguir los *hashes* del resto de usuarios se utiliza otra herramienta de *Impacket*, en este caso **secretsdump.py**. Con el parámetro --just-dc se indica que el volcado de credenciales se hará sólo desde el *Domain Controller* utilizando el mecanismo de replicación de *Microsoft Active Directory*. Utiliza el método DRSUAPI (Directory Replication Service Remote Protocol). Las credenciales recuperadas anteriormente nos servirán para este propósito.
+
+<code>secretsdump.py -just-dc backup@spookysec.local</code>
+
+<img width="935" height="497" alt="Captura de pantalla 2026-03-16 172402" src="https://github.com/user-attachments/assets/d645713a-d11b-479a-b463-053fa25e1060" />
+
+
+**Flag:  **
