@@ -15,7 +15,7 @@ Máquina resuelta de *TryHackMe* en la que se trabaja la enumeración y *fingerp
 
 ## Objetivo
 
-Explicar la realización del siguiente _Capture the flag_ perteneciente a la plataforma *TryHackMe*. Este desafío consiste en penetrar una máquina Windows con *Active Directory*. Para ello, se utilizarán distintos servicios presentes en la máqiuna como *kerberos* y *SMB* que nos permitiran conocer lso *hashes* que a la postre nos den acceso ala máquina. Para conseguir la bandera también será necesrio realizar una escalada de privilegios.
+Explicar la realización del siguiente _Capture the flag_ perteneciente a la plataforma *TryHackMe*. Este desafío consiste en penetrar una máquina Windows con *Active Directory*. Para ello, se utilizarán distintos servicios presentes en la máqiuna como *kerberos* y *SMB* que nos permitirán conocer los *hashes* que a la postre nos den acceso a la máquina. Para conseguir las banderas también será necesrio realizar una escalada de privilegios.
 
 ## Que hemos aprendido?
 
@@ -36,27 +36,28 @@ Explicar la realización del siguiente _Capture the flag_ perteneciente a la pla
 
 ### Enumeración y fingerprinting
 
-La máquina a vulnerar pertenece a la plataforma *TryHackMe*, la propia web te proporciona la IP de la máquina víctima. La conexión a esta se hace mediante una VPN que te proporciona THM y asigna una nueva IP para que tu máquina interactúe con la máquina vulnerable.
-El primero paso es lanzar **Nmap** sin *ping* (-Pn) y con los *scripts* por *default* de la herramienta (-sC) para que encuentre vulnerabilidades. Además se quieren conocer las versiones que corren en cada puerto (-sV) y el sistema operativo (-O). Se indica que haga un escaneo sobre los 100 puertos más comúnes (-F). Para evitar resolver nombres DNS se pasa el parámetro -n y con el objetivo de agilizar el escaneo se añade -T4.
+La máquina a vulnerar pertenece a la plataforma *TryHackMe*, la propia web te proporciona la IP de la máquina víctima. La conexión a esta se hace mediante una VPN que te proporciona THM, la cual asigna una nueva IP para que tu máquina interactúe con la máquina vulnerable.
+El primer paso es lanzar **Nmap** sin *ping* (-Pn) y con los *scripts* por *default* de la herramienta (-sC) para que encuentre vulnerabilidades. Además, se quieren conocer las versiones que corren en cada puerto (-sV) y el sistema operativo (-O). Se indica que haga un escaneo sobre los 100 puertos más comúnes (-F), para evitar resolver nombres DNS se pasa el parámetro -n y con el objetivo de agilizar el escaneo se añade -T4.
 
-<code>nmap -F -sV -O -sC -Pn -t4 -n 10.129.148.245</code>
+<code>nmap -F -sV -O -sC -Pn -T4 -n 10.129.148.245</code>
 
 <img width="1151" height="662" alt="Captura de pantalla 2026-03-14 130729" src="https://github.com/user-attachments/assets/bc794144-37eb-432b-b38d-3b173b6946c2" />
 <img width="1162" height="634" alt="Captura de pantalla 2026-03-14 130835" src="https://github.com/user-attachments/assets/1a05d8f5-7623-42ec-b556-01e4db5efdfa" />
 
 El comando devuelve varios puertos TCPs abiertos de los cuales se prestará especial atención a tres:  
 - En el puerto 88 corre el servicio *Microsoft Windows Kerberos*, en un sistema *Windows*, servicio *SSH*.
-- En el puerto 389 corre el servicio LDAP (Protocolo Ligero de Acceso a Directorios) encargado de manejar la forma en que las aplicaciones acceden y modifican la información en el *Active Directory*. Por lo que se puede esperar que estamos ante un *Domain controller*.
+- En el puerto 389 corre el servicio LDAP (Protocolo Ligero de Acceso a Directorios) encargado de manejar la forma en que las aplicaciones acceden y modifican la información en el *Active Directory*, por lo que se puede esperar que estamos ante un *Domain controller*.
 - En el puerto 445 corre la versión 2.02 del servicio *SMB*.
 
-Tambié se averigua que el nombre del dominio de NetBIOS es THM-AD, mientras que el nombre de dominio DNS es *spookysec.local*.
+Tambié se averigua que el nombre del dominio de NetBIOS es **THM-AD**, mientras que el nombre de dominio *DNS* es **spookysec.local**.
 
-Para facilitar el uso de las siguientes herramientas se añade la IP de la víctima a nuestro DNS local y quehaga la resolución DNS automáticamente.
+Para facilitar el uso de las siguientes herramientas se añade la IP de la víctima a nuestro DNS local para que haga la resolución DNS automáticamente.
 
 <code>echo 10.129.148.245 spookysec.local >> /etc/hosts</code>
 
-Lo primero será atacar el puerto 88 para enumerar los diferentes usuarios que hayan almacenados en el *Active Directory*. En este puerto corre el servicio, antes mencionado, *Kerberos*, el cual es un protocolo de autenticación de red que permite a usuarios y servicios demostrar su identidad de forma segura en una red, sin enviar contraseñas en texto plano. Se usa mucho en entornos empresariales, especialmente en *Microsoft Active Directory* y sistemas basados en *MIT Kerberos*. *Kerberos* funciona con tickets cifrados, en lugar de enviar la contraseña cada vez que accedes a un servicio, el sistema te da un ticket que prueba que ya te autenticaste. Así se evita que la contraseña viaje por la red. Como resúmen, *Active Directory* se el sistema de gestión y *kerberos* es el mecanismo de autenticación.
-Pues bien, la herramienta a utilizar se llama **kerbrute** que permite enumerar usuarios y probar contraseñas en dominios de AD usando el protocolo *kerberos*. Se le pasa el parametro 'usernum' para la enumeración de usuarios, se infomra el nombre del *Domian Controller* (--dc), el del dominio (-d), el número de hilos (-t) y una lista de usuairos con los que probar (users.txt).
+Lo primero será atacar el puerto 88 para enumerar los diferentes usuarios que hayan almacenados en el *Active Directory*. En este puerto corre el servicio, antes mencionado, *Kerberos*, el cual es un protocolo de autenticación de red que permite a usuarios y servicios demostrar su identidad de forma segura en una red, sin enviar contraseñas en texto plano. Se usa mucho en entornos empresariales, especialmente en *Microsoft Active Directory* y sistemas basados en *MIT Kerberos*. *Kerberos* funciona con tickets cifrados, en lugar de enviar la contraseña cada vez que accedes a un servicio, el sistema te da un ticket que prueba que ya te autenticaste. Así se evita que la contraseña viaje por la red. Como resúmen, *Active Directory* es el sistema de gestión y *kerberos* es el mecanismo de autenticación.
+
+Pues bien, la herramienta a utilizar se llama **kerbrute** que permite enumerar usuarios y probar contraseñas en dominios de AD usando el protocolo *kerberos*. Se le pasa el parametro 'usernum' para la enumeración de usuarios, se informa el nombre del *Domain Controller* (--dc), el del dominio (-d), el número de hilos (-t) y una lista de usuairos con los que probar (users.txt).
 
 <code>kerbrute userenum --dc spookysec.local -d spookysec.local -t 100 users.txt</code>
 
